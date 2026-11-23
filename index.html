@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Iowa Opioid Settlement Funds by County</title>
   <meta name="description" content="Look up what your Iowa county received, spent and reported funding with opioid settlement money in 2025." />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -22,6 +23,18 @@
   </header>
   <main class="wrap">
     <p id="status" role="status">Loading funding data…</p>
+    <section aria-labelledby="map-h">
+      <h2 id="map-h">Funding across Iowa</h2>
+      <label for="metric">Color the map by</label>
+      <select id="metric">
+        <option value="spent">Spent in 2025</option>
+        <option value="share">Spending as a share of funds received</option>
+        <option value="end">End balance</option>
+      </select>
+      <div id="map" role="region" aria-label="Map of Iowa counties colored by opioid settlement funding. Use the search box for keyboard access."></div>
+      <ul id="legend" class="legend"></ul>
+      <p class="note-muted">Dollar amounts tend to be larger in larger counties. A share can exceed 100% when a county spends from earlier balances. Select a county to see its details.</p>
+    </section>
     <section id="county" aria-live="polite"></section>
     <section aria-labelledby="state-h">
       <h2 id="state-h">Statewide, 2025</h2>
@@ -30,11 +43,13 @@
   </main>
   <footer class="wrap">
     <p>County-reported figures from <code>data/2025OpioidSettlementFundingIowa.csv</code>. Figures are shown as reported. This site does not include city or state-level funds.</p>
-    <p>2025 Opioid Settlement Funding Reports are available here <a href="https://www.documentcloud.org/documents/?q=+%2Bdata__tag%3A%22OSF-IA-2025%22"</a></p>
+    <!-- Add the official source name, link and report date here. -->
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="js/config.js"></script>
   <script src="js/common.js"></script>
+  <script src="js/map.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
