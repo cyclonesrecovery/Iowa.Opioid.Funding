@@ -20,6 +20,7 @@
         console.warn("Total row does not match the sum of counties. Check the data file.");
       renderState(sum);
       setupSearch();
+      if (window.IAMap) IAMap.init({ counties, onSelect: (c) => { $("q").value = `${c.name} County`; show(c); } });
       const p = new URLSearchParams(location.search);
       const c = byFips.get(normalizeFips(p.get("fips"))) ||
         counties.find((x) => x.name.toLowerCase() === String(p.get("county") || "").toLowerCase().replace(/ county$/, ""));
@@ -56,6 +57,7 @@
 
   function show(c, updateUrl = true) {
     if (updateUrl) history.replaceState(null, "", `?fips=${c.fips}`);
+    if (window.IAMap) IAMap.highlight(c.fips);
     let body;
     if (!reported(c)) {
       body = `<p class="note">${esc(c.name)} County has no funding figures in this dataset. That is different from spending nothing.</p>`;
