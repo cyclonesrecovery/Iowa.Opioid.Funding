@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iowa Opioid Settlement Funds by County</title>
+  <meta name="description" content="Look up what your Iowa county received, spent and reported funding with opioid settlement money in 2025." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <h1>What has your county done with opioid settlement funds?</h1>
+      <p>Search any of Iowa’s 99 counties to see what it received, spent, and reported funding in 2025.</p>
+      <div class="search" role="search">
+        <label for="q" class="sr" style="position:absolute;left:-9999px">Search for an Iowa county</label>
+        <input id="q" type="text" role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list"
+               placeholder="Type a county name, like Polk" autocomplete="off" />
+        <ul id="results" role="listbox" aria-label="Matching counties" hidden></ul>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    <p id="status" role="status">Loading funding data…</p>
+    <section id="county" aria-live="polite"></section>
+    <section aria-labelledby="state-h">
+      <h2 id="state-h">Statewide, 2025</h2>
+      <div id="state"></div>
+    </section>
+  </main>
+  <footer class="wrap">
+    <p>County-reported figures from <code>data/2025OpioidSettlementFundingIowa.csv</code>. Figures are shown as reported. This site does not include city or state-level funds.</p>
+    <!-- Add the official source name, link and report date here. -->
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
