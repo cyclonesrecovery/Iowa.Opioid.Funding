@@ -5,7 +5,6 @@ Static GitHub Pages site. Search a county to see 2025 funds received, spent, end
 - `?fips=19153` or `?county=Polk` links directly to a county.
 - Blank figures mean "not reported" (shown separately from a reported $0).
 - The CSV's "Total" row is checked against the sum of counties on load (see the browser console).
-- Add the official source name, link and report date in the footer of `index.html`.
 
 ## Structure
 ```text
