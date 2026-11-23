@@ -1,16 +1,17 @@
 // Choropleth of Iowa counties. No basemap tiles: just county shapes.
 window.IAMap = (function () {
-  const { escapeHtml: esc, normalizeFips, money } = window.IA;
+  const { escapeHtml: esc, normalizeFips, money, perPerson } = window.IA;
   const RAMP = ["#d7ece9", "#a6d5cf", "#6bb8af", "#2f918a", "#0e6b66"];
   const ZERO = "#ffffff", NONE = "#cfd6db", INK = "#18232d";
   const compact = (v) => v.toLocaleString("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 });
   const pct = (v) => `${Math.round(v * 100)}%`;
   const METRICS = {
+    perPerson: { label: "Spent per resident", get: (c) => (c.pop && c.spent !== null ? c.spent / c.pop : null), fmt: perPerson, short: perPerson },
     spent: { label: "Spent in 2025", get: (c) => c.spent, fmt: money, short: compact },
     share: { label: "Spending as a share of funds received", get: (c) => (c.received > 0 && c.spent !== null ? c.spent / c.received : null), fmt: pct, short: pct },
     end: { label: "End balance", get: (c) => c.end, fmt: money, short: compact }
   };
-  let counties = [], layer = null, onSelect = () => {}, metric = "spent", selected = "", breaks = [], range = [0, 0];
+  let counties = [], layer = null, onSelect = () => {}, metric = "perPerson", selected = "", breaks = [], range = [0, 0];
 
   const nameKey = (s) => String(s || "").toLowerCase().replace(/\s+county$/, "").replace(/[^a-z0-9]/g, "");
 
