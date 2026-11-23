@@ -1,13 +1,13 @@
 (function () {
-  const { escapeHtml: esc, normalizeFips, parseNumber, money, loadCsv } = window.IA;
+  const { escapeHtml: esc, normalizeFips, parseNumber, money, perPerson, loadCsv } = window.IA;
   const $ = (id) => document.getElementById(id);
   const num = (v) => (String(v ?? "").trim() === "" ? null : parseNumber(v)); // blank = not reported, not $0
   const reported = (c) => [c.start, c.received, c.spent, c.end].some((v) => v !== null);
-  const counties = [], byFips = new Map();
+  const counties = [], byFips = new Map(), cities = [];
 
   async function init() {
     try {
-      const rows = await loadCsv(window.IA_CONFIG.files.funding);
+      const [rows, popRows] = await Promise.all([loadCsv(window.IA_CONFIG.files.funding), loadCsv(window.IA_CONFIG.files.population)]);
       let totalRow = null;
       for (const r of rows) {
         const c = { fips: normalizeFips(r.FIPS), name: String(r.County || "").trim(),
@@ -15,6 +15,15 @@
           end: num(r["End Balance"]), activities: String(r["Funded Activities"] || "").trim() };
         if (c.fips) { counties.push(c); byFips.set(c.fips, c); } else if (/^total$/i.test(c.name)) totalRow = c;
       }
+      for (const r of popRows) { // county population = sum of every row (cities + "Balance of" rows)
+        const c = byFips.get(normalizeFips(r.county_fips_code));
+        if (!c) continue;
+        const est = parseNumber(r.estimate), city = String(r.city || "").trim();
+        c.pop = (c.pop || 0) + est;
+        if (city && !/^Balance of /i.test(city)) cities.push({ name: city.replace(/\s*\(pt\.\)\s*$/i, ""), c, pop: est });
+      }
+      const noPop = counties.filter((c) => !c.pop).map((c) => c.name);
+      if (noPop.length) console.warn("No population found for:", noPop.join(", "));
       const sum = (k) => counties.reduce((a, c) => a + (c[k] || 0), 0);
       if (totalRow && ["start", "received", "spent", "end"].some((k) => Math.abs(sum(k) - totalRow[k]) > 1))
         console.warn("Total row does not match the sum of counties. Check the data file.");
@@ -42,6 +51,7 @@
       <dl class="ledger">
         <div><dt>Funds received</dt><dd>${money(sum("received"))}</dd></div>
         <div><dt>Spent</dt><dd>${money(sum("spent"))}</dd></div>
+        <div><dt>Spent per resident</dt><dd>${perPerson(sum("spent") / (rep.reduce((a, c) => a + (c.pop || 0), 0) || 1))}</dd></div>
         <div><dt>Combined end balances</dt><dd>${money(sum("end"))}</dd></div>
         <div><dt>Median county spending</dt><dd>${money(median)}</dd></div>
       </dl>
@@ -68,6 +78,7 @@
         : c.received > 0 && c.spent ? `Spending equals ${Math.round((c.spent / c.received) * 100)}% of the funds received during the year.` : "";
       body = `<dl class="ledger">${row("Start balance", c.start)}${row("Funds received", c.received)}${row("Spent", c.spent)}${row("End balance", c.end)}</dl>
         ${line ? `<p>${line}</p>` : ""}
+        ${c.pop && c.spent !== null ? `<p>That is ${perPerson(c.spent / c.pop)} per resident (2024 population: ${c.pop.toLocaleString("en-US")}).</p>` : ""}
         ${gap ? `<p class="note">Start balance + funds received − spent does not equal the reported end balance. Figures are shown as reported.</p>` : ""}
         <h3>What the county reported funding</h3>${activities(c.activities)}`;
     }
@@ -86,16 +97,21 @@
       [...list.children].forEach((li, j) => li.setAttribute("aria-selected", String(j === i)));
       if (i >= 0) input.setAttribute("aria-activedescendant", list.children[i].id);
     };
-    const choose = (c) => { input.value = `${c.name} County`; close(); show(c); };
+    const choose = (it) => { input.value = it.label; close(); show(it.c); };
+    const starts = (n, q) => n.toLowerCase().startsWith(q);
     input.addEventListener("input", () => {
       const q = input.value.trim().toLowerCase().replace(/ county$/, "");
       if (!q) return close();
-      items = counties.filter((c) => c.name.toLowerCase().includes(q) || c.fips.includes(q))
-        .sort((a, b) => b.name.toLowerCase().startsWith(q) - a.name.toLowerCase().startsWith(q) || a.name.localeCompare(b.name))
-        .slice(0, 8);
+      const byCounty = counties.filter((c) => c.name.toLowerCase().includes(q) || c.fips.includes(q))
+        .sort((a, b) => starts(b.name, q) - starts(a.name, q) || a.name.localeCompare(b.name)).slice(0, 5)
+        .map((c) => ({ c, label: `${c.name} County` }));
+      const byCity = cities.filter((x) => x.name.toLowerCase().includes(q))
+        .sort((a, b) => starts(b.name, q) - starts(a.name, q) || b.pop - a.pop).slice(0, 5)
+        .map((x) => ({ c: x.c, label: `${x.name}, ${x.c.name} County` }));
+      items = [...byCounty, ...byCity];
       list.innerHTML = items.length
-        ? items.map((c, i) => `<li role="option" id="opt-${i}" data-i="${i}">${esc(c.name)} County</li>`).join("")
-        : `<li class="none">No Iowa county matches “${esc(input.value.trim())}”.</li>`;
+        ? items.map((it, i) => `<li role="option" id="opt-${i}" data-i="${i}">${esc(it.label)}</li>`).join("")
+        : `<li class="none">No Iowa county or city matches “${esc(input.value.trim())}”.</li>`;
       list.hidden = false; input.setAttribute("aria-expanded", "true"); setActive(items.length ? 0 : -1);
     });
     input.addEventListener("keydown", (e) => {
