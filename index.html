@@ -12,11 +12,11 @@
   <header class="hero">
     <div class="wrap">
       <h1>What has your county done with opioid settlement funds?</h1>
-      <p>Search any of Iowa’s 99 counties to see what it received, spent, and reported funding in 2025.</p>
+      <p>Search by county or city to see what its county received, spent, and reported funding in 2025.</p>
       <div class="search" role="search">
-        <label for="q" class="sr" style="position:absolute;left:-9999px">Search for an Iowa county</label>
+        <label for="q" class="sr" style="position:absolute;left:-9999px">Search for an Iowa county or city</label>
         <input id="q" type="text" role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list"
-               placeholder="Type a county name, like Polk" autocomplete="off" />
+               placeholder="Type a county or city, like Polk or Ames" autocomplete="off" />
         <ul id="results" role="listbox" aria-label="Matching counties" hidden></ul>
       </div>
     </div>
@@ -27,13 +27,14 @@
       <h2 id="map-h">Funding across Iowa</h2>
       <label for="metric">Color the map by</label>
       <select id="metric">
+        <option value="perPerson">Spent per resident</option>
         <option value="spent">Spent in 2025</option>
         <option value="share">Spending as a share of funds received</option>
         <option value="end">End balance</option>
       </select>
       <div id="map" role="region" aria-label="Map of Iowa counties colored by opioid settlement funding. Use the search box for keyboard access."></div>
       <ul id="legend" class="legend"></ul>
-      <p class="note-muted">Dollar amounts tend to be larger in larger counties. A share can exceed 100% when a county spends from earlier balances. Select a county to see its details.</p>
+      <p class="note-muted">Per-resident figures pair 2025 spending with 2024 population estimates. Total dollar amounts tend to be larger in larger counties. A share can exceed 100% when a county spends from earlier balances. Select a county to see its details.</p>
     </section>
     <section id="county" aria-live="polite"></section>
     <section aria-labelledby="state-h">
@@ -42,7 +43,7 @@
     </section>
   </main>
   <footer class="wrap">
-    <p>County-reported figures from <code>data/2025OpioidSettlementFundingIowa.csv</code>. Figures are shown as reported. This site does not include city or state-level funds.</p>
+    <p>County-reported figures from <code>data/2025OpioidSettlementFundingIowa.csv</code>. Figures are shown as reported. Population: 2024 city and county estimates (<code>data/IACityCountyPopulation2024.csv</code>). Cities are shown with the county that holds the funds. This site does not include city or state-level funds.</p>
     <!-- Add the official source name, link and report date here. -->
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
